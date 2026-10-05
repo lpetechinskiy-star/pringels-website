@@ -76,7 +76,7 @@ export class Director {
   private camOff = { x: 0, y: 0, vx: 0, vy: 0 }
   private wind = { x: 0, v: 0, lastY: window.scrollY }
   private heroEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null, interacted: -10, nextAuto: 4.5 }
-  private flavorEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null, last: 0 }
+  private flavorEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null, interacted: -10, nextAuto: 0 }
   private canSpin = { ang: 0, vel: 0, drag: null as Drag | null, ang0: 0 }
   private lid = { y: 0, v: 0, r: 0, vr: 0 }
   private season = new THREE.Color(FLAVORS[0].season)
@@ -372,6 +372,7 @@ export class Director {
       this.on(fl, "pointerdown", (e) => {
         if ((e.target as Element).closest("button,a")) return
         E.drag = this.dragStart(e, E.a)
+        E.interacted = this.time
       })
       this.on(fl, "pointermove", (e) => {
         if (!this.dragMove(E.drag, e, fl)) return
@@ -383,6 +384,7 @@ export class Director {
         const d = E.drag
         E.drag = null
         if (!d || d.id !== e.pointerId) return
+        E.interacted = this.time
         if (!d.moved) {
           // a click on a can that isn't chosen brings it forward
           const hit = this.pickCan(e.clientX, e.clientY)
@@ -472,8 +474,18 @@ export class Director {
       E.target = Math.round(E.target) - by
       E.interacted = this.time
     }
-    commands.flavorStep = (by: number) => this.flavorTarget(Math.round(this.flavorEng.target) + by)
-    commands.flavorGo = (i: number) => this.flavorGo(i)
+    commands.flavorStep = (by: number) => {
+      this.flavorEng.interacted = this.time
+      this.flavorTarget(Math.round(this.flavorEng.target) + by)
+    }
+    commands.flavorGo = (i: number) => {
+      this.flavorEng.interacted = this.time
+      this.flavorGo(i)
+    }
+    commands.flavorAuto = (on: boolean) => {
+      store.set({ autoplay: on })
+      this.flavorEng.nextAuto = this.time + 1.2
+    }
     commands.shake = () => {
       if (!this.physics.active) return
       this.physics.blast(0, -this.ctx.H * 0.6, 16)
@@ -598,6 +610,23 @@ export class Director {
     h.my = lerp(h.my, mouseOn ? this.mouse.y : 0, 1 - Math.exp(-dt * 6))
 
     const FE = this.flavorEng
+    // like the reference's autoplay: the cans page through on their own, a beat
+    // apart, back to the first after the last; any touch of the controls pauses
+    // it for a few seconds, the pause button stops it
+    if (k === SCENE.flavors && this.lastScene !== SCENE.flavors) FE.nextAuto = this.time + 2.2
+    if (
+      k === SCENE.flavors &&
+      w < 0.5 &&
+      store.get().autoplay &&
+      !this.reduced &&
+      !FE.drag &&
+      this.time - FE.interacted > 6 &&
+      this.time > FE.nextAuto
+    ) {
+      const n = FLAVORS.length
+      this.flavorTarget(Math.round(FE.target) >= n - 1 ? 0 : Math.round(FE.target) + 1)
+      FE.nextAuto = this.time + 3.4
+    }
     if (this.reduced && !FE.drag) {
       FE.a = FE.b = FE.target
     } else {

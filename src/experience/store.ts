@@ -20,6 +20,8 @@ export type ExperienceState = {
   canOpen: boolean
   /** How many chips are on stage. */
   chips: number
+  /** The flavour cans page through on their own. */
+  autoplay: boolean
 }
 
 type Listener = () => void
@@ -62,6 +64,7 @@ export const store = createStore({
   reduced: prefersReduced,
   canOpen: false,
   chips: 32,
+  autoplay: !prefersReduced,
 })
 
 export function useExperience<T>(select: (s: ExperienceState) => T): T {
@@ -72,6 +75,7 @@ export function useExperience<T>(select: (s: ExperienceState) => T): T {
 export const commands = {
   flavorStep: (_by: number) => {},
   flavorGo: (_i: number) => {},
+  flavorAuto: (_on: boolean) => {},
   heroStep: (_by: number) => {},
   shake: () => {},
   popCan: () => {},

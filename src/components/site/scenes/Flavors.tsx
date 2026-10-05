@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react"
 import gsap from "gsap"
 import { SplitText } from "gsap/SplitText"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react"
 import { Eyebrow, Scene, useScrub, useSectionRef } from "../scene"
 import { FLAVORS } from "@/data/flavors"
 import { commands, useExperience } from "@/experience/store"
@@ -35,6 +35,7 @@ function Meter({ label, value, color }: { label: string; value: number; color: s
 export function Flavors() {
   const ref = useSectionRef()
   const flavor = useExperience((s) => s.flavor)
+  const autoplay = useExperience((s) => s.autoplay)
   const f = FLAVORS[flavor]
   const name = useRef<HTMLHeadingElement>(null)
   const first = useRef(true)
@@ -79,15 +80,15 @@ export function Flavors() {
   return (
     <Scene id="flavors" label="Вкусы" drag="flavors" sectionRef={ref}>
       <div className="absolute inset-0 transition-colors duration-700" style={{ color: f.ink }}>
-        <div className="absolute inset-x-4 top-20 md:left-8 md:right-auto md:top-24 md:w-[min(36rem,44vw)]">
+        <div className="absolute inset-x-4 top-20 md:left-8 md:right-auto md:top-24 md:w-[min(40rem,46vw)]">
           <Eyebrow n="05">
             Вкусы
           </Eyebrow>
           <h2
             ref={name}
             key={f.id}
-            className="display mt-3 text-[clamp(1.9rem,8.2vw,4rem)] [perspective:600px] md:text-[clamp(2.4rem,4.3vw,5.2rem)]"
-            aria-live="polite"
+            className="display mt-3 text-[clamp(1.9rem,8.2vw,4rem)] [perspective:600px] md:text-[clamp(2rem,3.6vw,3.6rem)]"
+            aria-live={autoplay ? "off" : "polite"}
           >
             {f.name}
           </h2>
@@ -150,6 +151,15 @@ export function Flavors() {
           </div>
           <div className="flex items-center gap-3">
             <span className="eyebrow hidden opacity-80 lg:inline">Тяни банки · ← →</span>
+            <button
+              type="button"
+              className="round-btn"
+              aria-label={autoplay ? "Остановить автолистание" : "Включить автолистание"}
+              aria-pressed={!autoplay}
+              onClick={() => commands.flavorAuto(!autoplay)}
+            >
+              {autoplay ? <Pause aria-hidden="true" className="size-5" /> : <Play aria-hidden="true" className="size-5" />}
+            </button>
             <button
               type="button"
               className="round-btn"
