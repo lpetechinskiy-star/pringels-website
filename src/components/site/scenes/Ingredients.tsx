@@ -22,11 +22,12 @@ export function Ingredients() {
     const counter = q("[data-count]")
     words.forEach((w, i) => {
       const at = 0.04 + i * 0.19
-      tl.fromTo(w, { yPercent: 110, skewY: 8 }, { yPercent: 0, skewY: 0, duration: 0.07, ease: "power4.out" }, at)
+      // travel well past the mask and fade: a skewed wide word would otherwise poke its corners back into view
+      tl.fromTo(w, { yPercent: 150, skewY: 5, autoAlpha: 0 }, { yPercent: 0, skewY: 0, autoAlpha: 1, duration: 0.07, ease: "power4.out" }, at)
       tl.fromTo(notes[i], { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.05 }, at + 0.03)
       tl.set(counter, { textContent: "0" + (i + 1) }, at)
       if (i < words.length - 1) {
-        tl.to(w, { yPercent: -110, skewY: -8, duration: 0.06, ease: "power3.in" }, at + 0.15)
+        tl.to(w, { yPercent: -150, skewY: -5, autoAlpha: 0, duration: 0.06, ease: "power3.in" }, at + 0.15)
         tl.to(notes[i], { opacity: 0, duration: 0.04 }, at + 0.15)
       }
     })
