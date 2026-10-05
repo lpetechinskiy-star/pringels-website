@@ -154,7 +154,7 @@ export function Flavors() {
             <button
               type="button"
               className="round-btn"
-              aria-label={autoplay ? "Остановить автолистание" : "Включить автолистание"}
+              aria-label={autoplay ? "Остановить движение банок" : "Запустить движение банок"}
               aria-pressed={!autoplay}
               onClick={() => commands.flavorAuto(!autoplay)}
             >
@@ -164,7 +164,6 @@ export function Flavors() {
               type="button"
               className="round-btn"
               aria-label="Предыдущий вкус"
-              disabled={flavor === 0}
               onClick={() => commands.flavorStep(-1)}
             >
               <ArrowLeft aria-hidden="true" className="size-5" />
@@ -176,7 +175,6 @@ export function Flavors() {
               type="button"
               className="round-btn"
               aria-label="Следующий вкус"
-              disabled={flavor === FLAVORS.length - 1}
               onClick={() => commands.flavorStep(1)}
             >
               <ArrowRight aria-hidden="true" className="size-5" />

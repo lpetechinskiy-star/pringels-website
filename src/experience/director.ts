@@ -1,12 +1,14 @@
 import * as THREE from "three"
 import {
   indexAt,
+  offsetOf,
   poseOf,
   releaseTarget,
   rng,
-  rubber,
   springOf,
   springStep,
+  targetFor,
+  wrapIndex,
   type PoseConfig,
 } from "@/components/ui/disc-cascade-carousel"
 import { CHAPTERS } from "@/data/chapters"
@@ -16,6 +18,7 @@ import {
   DEG,
   FORMATIONS,
   clamp,
+  finaleCanQuat,
   finaleCenter,
   flavorCenter,
   lerp,
@@ -51,8 +54,12 @@ type Section = { top: number; h: number }
 const SCENE = Object.fromEntries(CHAPTERS.map((c, i) => [c.id, i])) as Record<(typeof CHAPTERS)[number]["id"], number>
 const DARK_SCENES = new Set([SCENE.story, SCENE.ingredients])
 const SPRING = springOf(0.22, 0.9)
+/** The flavour line loops over two cans per flavour. */
+const NC = FLAVORS.length * 2
+/** Cans per second the flavour line drifts on its own. */
+const DRIFT = 0.16
 
-const newPose = (): Pose => ({ p: new THREE.Vector3(), q: new THREE.Quaternion(), s: 0, shadow: 0 })
+const newPose = (): Pose => ({ p: new THREE.Vector3(), q: new THREE.Quaternion(), s: 0, shadow: 0, free: 1 })
 
 /**
  * Runs the show: reads the scroll position, works out which formation (or pair
@@ -76,7 +83,7 @@ export class Director {
   private camOff = { x: 0, y: 0, vx: 0, vy: 0 }
   private wind = { x: 0, v: 0, lastY: window.scrollY }
   private heroEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null, interacted: -10, nextAuto: 4.5 }
-  private flavorEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null, interacted: -10, nextAuto: 0 }
+  private flavorEng = { a: 0, va: 0, b: 0, vb: 0, target: 0, drag: null as Drag | null }
   private canSpin = { ang: 0, vel: 0, drag: null as Drag | null, ang0: 0 }
   private lid = { y: 0, v: 0, r: 0, vr: 0 }
   private season = new THREE.Color(FLAVORS[0].season)
@@ -372,28 +379,26 @@ export class Director {
       this.on(fl, "pointerdown", (e) => {
         if ((e.target as Element).closest("button,a")) return
         E.drag = this.dragStart(e, E.a)
-        E.interacted = this.time
       })
       this.on(fl, "pointermove", (e) => {
         if (!this.dragMove(E.drag, e, fl)) return
         const d = E.drag!
-        E.a = rubber(d.pos0 - (e.clientX - d.x0) / this.flavorSlotPx(), FLAVORS.length)
-        this.setFlavor(indexAt(E.a, FLAVORS.length, false))
+        E.a = E.target = d.pos0 - (e.clientX - d.x0) / this.flavorSlotPx()
       })
       const up = (e: PointerEvent) => {
         const d = E.drag
         E.drag = null
         if (!d || d.id !== e.pointerId) return
-        E.interacted = this.time
         if (!d.moved) {
-          // a click on a can that isn't chosen brings it forward
+          // a click on a can brings it to the middle
           const hit = this.pickCan(e.clientX, e.clientY)
-          if (hit >= 0) this.flavorGo(hit)
+          if (hit >= 0) E.target = targetFor(hit, E.target, NC, true)
           return
         }
+        // a flick carries on, then the slow drift takes over again — no snapping, no stopping
         const v = (-this.dragVelocity(d, e) / this.flavorSlotPx()) * 1000
         E.va = v
-        this.flavorTarget(releaseTarget(E.a, v, FLAVORS.length, false))
+        E.target = E.a + Math.max(-3, Math.min(3, v * 0.3))
       }
       this.on(fl, "pointerup", up)
       this.on(fl, "pointercancel", up)
@@ -475,17 +480,11 @@ export class Director {
       E.interacted = this.time
     }
     commands.flavorStep = (by: number) => {
-      this.flavorEng.interacted = this.time
-      this.flavorTarget(Math.round(this.flavorEng.target) + by)
+      const E = this.flavorEng
+      E.target = Math.round(E.target) + by
     }
-    commands.flavorGo = (i: number) => {
-      this.flavorEng.interacted = this.time
-      this.flavorGo(i)
-    }
-    commands.flavorAuto = (on: boolean) => {
-      store.set({ autoplay: on })
-      this.flavorEng.nextAuto = this.time + 1.2
-    }
+    commands.flavorGo = (i: number) => this.flavorGo(i)
+    commands.flavorAuto = (on: boolean) => store.set({ autoplay: on })
     commands.shake = () => {
       if (!this.physics.active) return
       this.physics.blast(0, -this.ctx.H * 0.6, 16)
@@ -497,14 +496,12 @@ export class Director {
     }
   }
 
+  /** Bring the nearer of flavour i's two cans to the middle. */
   private flavorGo(i: number) {
-    this.flavorTarget(i)
-  }
-
-  private flavorTarget(t: number) {
-    const n = FLAVORS.length
-    this.flavorEng.target = Math.min(Math.max(t, 0), n - 1)
-    this.setFlavor(indexAt(this.flavorEng.target, n, false))
+    const E = this.flavorEng
+    const a = targetFor(i, E.target, NC, true)
+    const b = targetFor(i + FLAVORS.length, E.target, NC, true)
+    E.target = Math.abs(a - E.target) <= Math.abs(b - E.target) ? a : b
   }
 
   private setFlavor(i: number) {
@@ -518,10 +515,12 @@ export class Director {
       const dx = ch.p.x - this.V.x
       const dz = ch.p.z - this.V.z
       const d = Math.max(0.3, Math.hypot(dx, dz))
-      ch.v.x += (dx / d) * 7
-      ch.v.z += (dz / d) * 7
-      ch.v.y += (Math.random() - 0.3) * 4
-      ch.w.set((Math.random() - 0.5) * 18, (Math.random() - 0.5) * 18, (Math.random() - 0.5) * 18)
+      ch.v.x += (dx / d) * 4
+      ch.v.z += (dz / d) * 4
+      ch.v.y += (Math.random() - 0.3) * 2.5
+      ch.w.x += (Math.random() - 0.5) * 10
+      ch.w.y += (Math.random() - 0.5) * 10
+      ch.w.z += (Math.random() - 0.5) * 10
     }
   }
 
@@ -610,23 +609,9 @@ export class Director {
     h.my = lerp(h.my, mouseOn ? this.mouse.y : 0, 1 - Math.exp(-dt * 6))
 
     const FE = this.flavorEng
-    // like the reference's autoplay: the cans page through on their own, a beat
-    // apart, back to the first after the last; any touch of the controls pauses
-    // it for a few seconds, the pause button stops it
-    if (k === SCENE.flavors && this.lastScene !== SCENE.flavors) FE.nextAuto = this.time + 2.2
-    if (
-      k === SCENE.flavors &&
-      w < 0.5 &&
-      store.get().autoplay &&
-      !this.reduced &&
-      !FE.drag &&
-      this.time - FE.interacted > 6 &&
-      this.time > FE.nextAuto
-    ) {
-      const n = FLAVORS.length
-      this.flavorTarget(Math.round(FE.target) >= n - 1 ? 0 : Math.round(FE.target) + 1)
-      FE.nextAuto = this.time + 3.4
-    }
+    // the line never stops: it drifts slowly on its own while the scene is on screen,
+    // and a drag, flick, click or arrow just moves it from wherever it is
+    if (k === SCENE.flavors && w < 0.5 && store.get().autoplay && !this.reduced && !FE.drag) FE.target += DRIFT * dt
     if (this.reduced && !FE.drag) {
       FE.a = FE.b = FE.target
     } else {
@@ -634,6 +619,7 @@ export class Director {
       ;[FE.b, FE.vb] = springStep(FE.b, FE.vb, FE.a, SPRING.omega * 1.05, SPRING.tilt, dt)
     }
     c.flavorB = FE.b
+    this.setFlavor(wrapIndex(Math.round(FE.a), NC) % FLAVORS.length)
 
     const CS = this.canSpin
     if (!CS.drag) {
@@ -683,15 +669,18 @@ export class Director {
   private target(i: number, k: number, t: number, w: number, out: Pose) {
     const c = this.ctx
     const A = this.A
+    A.free = 1
     FORMATIONS[k](i, t, c, A)
     if (w <= 0 || k + 1 >= FORMATIONS.length) {
       out.p.copy(A.p)
       out.q.copy(A.q)
       out.s = A.s
       out.shadow = A.shadow
+      out.free = A.free
       return
     }
     const B = this.B
+    B.free = 1
     FORMATIONS[k + 1](i, 0, c, B)
     const r = this.R[i]
     const wi = smooth(0, 1, (w - r[7] * 0.35) / 0.65)
@@ -705,6 +694,7 @@ export class Director {
     out.q.multiply(this.Q.setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI * 2 * wi * (r[4] > 0.5 ? 1 : -1)))
     out.s = lerp(A.s, B.s, wi)
     out.shadow = lerp(A.shadow, B.shadow, wi)
+    out.free = lerp(A.free, B.free, wi)
   }
 
   private updateChips(k: number, t: number, w: number, dt: number, mouseOn: boolean) {
@@ -726,20 +716,20 @@ export class Director {
       this.target(i, k, t, w, T)
 
       // wind: lean with the scroll
-      if (!physicsScene && this.wind.x) {
-        T.q.premultiply(this.Q.setFromAxisAngle(this.V.set(1, 0, 0), this.wind.x * 0.55 * (0.6 + this.R[i][2] * 0.8)))
-        T.p.y -= this.wind.x * c.C * 0.12
+      if (!physicsScene && this.wind.x && T.free > 0) {
+        T.q.premultiply(this.Q.setFromAxisAngle(this.V.set(1, 0, 0), this.wind.x * 0.55 * T.free * (0.6 + this.R[i][2] * 0.8)))
+        T.p.y -= this.wind.x * c.C * 0.12 * T.free
       }
 
       // cursor: chips near the pointer duck away and tilt
       let offT = 0
-      if (mouseOn && !physicsScene) {
+      if (mouseOn && !physicsScene && T.free > 0.01) {
         this.V.copy(T.p).project(cam)
         const dx = (this.V.x - this.mouse.x) * cam.aspect
         const dy = this.V.y - this.mouse.y
         const d = Math.hypot(dx, dy)
         if (d < 0.38 && d > 1e-4) {
-          const f = (1 - d / 0.38) ** 2
+          const f = (1 - d / 0.38) ** 2 * T.free
           const k2 = ((CAM_Z - T.p.z) / CAM_Z) * c.C * 0.75 * f
           this.P.set((dx / d) * k2, (dy / d) * k2, f * 0.8)
           T.q.premultiply(this.Q.setFromAxisAngle(this.V.set(-dy / d, dx / d, 0), f * 0.7))
@@ -863,13 +853,15 @@ export class Director {
     const cx = this.V.x
     const cy = this.V.y
     this.stage.flavorCans.forEach((can, j) => {
-      const p = poseOf(j - this.flavorEng.a, j - this.flavorEng.b, cfg)
+      const da = offsetOf(j, this.flavorEng.a, NC, true)
+      const db = offsetOf(j, this.flavorEng.b, NC, true)
+      const p = poseOf(da, db, cfg)
       const g = can.group
       g.visible = vis > 0.01 && !p.hidden && p.opacity > 0.02
       if (!g.visible) return
       const enter = 1 - vis
       g.position.set(cx + p.x * D, cy - p.y * D - enter * c.H * 1.2, p.z * D)
-      rot(g.quaternion, 0.12, (p.yaw + p.roll) * DEG + enter * Math.PI * 1.5, (-7 + (j - this.flavorEng.b) * 1.5) * DEG)
+      rot(g.quaternion, 0.12, (p.yaw + p.roll) * DEG + enter * Math.PI * 1.5, (-7 + db * 1.5) * DEG)
       g.scale.setScalar(cs * p.opacity)
       can.lid.position.y = CAN_H / 2 + 0.06
       can.lid.rotation.set(0, 0, 0)
@@ -883,7 +875,7 @@ export class Director {
     finaleCenter(c, this.V)
     const drop = 1 - smooth(0.32, 0.7, tf)
     fc.group.position.set(this.V.x, this.V.y + drop * c.H * 1.15 + this.tail, 0)
-    rot(fc.group.quaternion, 0.1, this.canSpin.ang - 0.3, -4 * DEG)
+    finaleCanQuat(c, fc.group.quaternion)
     fc.group.scale.setScalar(cs)
     const L = this.lid
     const open = c.finale.open

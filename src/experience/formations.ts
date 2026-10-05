@@ -9,7 +9,8 @@ import { CAN_H, CAN_R } from "./can"
  * decides where every chip should be and physics decides how it gets there.
  */
 
-export type Pose = { p: THREE.Vector3; q: THREE.Quaternion; s: number; shadow: number }
+/** `free` (0…1) is how much the cursor and scroll wind may push the chip; 0 for chips locked inside the can. */
+export type Pose = { p: THREE.Vector3; q: THREE.Quaternion; s: number; shadow: number; free: number }
 
 export type HeroState = {
   a: number
@@ -300,11 +301,19 @@ export function finaleCenter(c: Ctx, out: THREE.Vector3) {
   return out.set(0, c.mobile ? -0.03 * c.H : -0.04 * c.H, 0)
 }
 
+/** The finale can's orientation; the stack inside is laid out in this frame so it tilts and spins with the can. */
+export function finaleCanQuat(c: Ctx, out: THREE.Quaternion) {
+  return rot(out, 0.1, c.finale.spin - 0.3, -4 * DEG)
+}
+const _canQ = new THREE.Quaternion()
+const _slot = new THREE.Vector3()
+
 export function finale(i: number, t: number, c: Ctx, o: Pose) {
   const r = c.R[i]
   finaleCenter(c, _v)
   const cs = c.canScale
-  const sIn = ((CAN_R * cs * 0.86) / CHIP_A) * 1
+  // a little narrower than the can, with room for the wobbly rim
+  const sIn = (CAN_R * cs * 0.8) / CHIP_A
   const gap = sIn * 0.075
   const base = _v.y - CAN_H * cs * 0.42
   const start = (i / c.N) * 0.4
@@ -324,6 +333,7 @@ export function finale(i: number, t: number, c: Ctx, o: Pose) {
     tumble(o.q, r, d * 7)
     o.s = c.S * 0.9
     o.shadow = 0.6
+    o.free = 1
     return
   }
   const th = i * 2.399 + t * 7 + c.time * 0.3
@@ -331,13 +341,17 @@ export function finale(i: number, t: number, c: Ctx, o: Pose) {
   const sx = _v.x + Math.cos(th) * rad
   const sy = _v.y + (r[1] - 0.5) * c.H * 0.7 * (1 - t)
   const sz = Math.sin(th) * rad
-  o.p.set(sx + (_v.x - sx) * a, sy + (base + i * gap - sy) * a, sz * (1 - a))
+  // the chip's slot in the stack, in the can's own frame
+  finaleCanQuat(c, _canQ)
+  _slot.set(0, base - _v.y + i * gap, 0).applyQuaternion(_canQ).add(_v)
+  o.p.set(sx + (_slot.x - sx) * a, sy + (_slot.y - sy) * a, sz + (_slot.z - sz) * a)
   o.p.y += Math.sin(Math.PI * a) * c.C * 0.8
   tumble(_qt, r, t * 6)
-  flat(o.q, f.spin, 0)
+  flat(o.q, 0, 0).premultiply(_canQ)
   o.q.copy(_qt.slerp(o.q, a))
   o.s = lerp(c.S * 0.8, sIn, a)
   o.shadow = 1 - a
+  o.free = 1 - a
 }
 
 export const FORMATIONS = [hero, story, shape, stack, ingredients, flavors, history, play, community, finale]

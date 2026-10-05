@@ -51,14 +51,14 @@ export class Stage {
     this.back = this.makeLayer(backCanvas, true, lowPower)
     this.front = this.makeLayer(frontCanvas, false, lowPower)
 
-    FLAVORS.forEach((f, i) => {
-      const t = createLabelTexture(f, i)
-      this.labelTextures.push(t)
-      const can = createCan(t)
+    FLAVORS.forEach((f, i) => this.labelTextures.push(createLabelTexture(f, i)))
+    // two cans per flavour, so the endless line wraps round while the wrapping can is off screen
+    for (let j = 0; j < FLAVORS.length * 2; j++) {
+      const can = createCan(this.labelTextures[j % FLAVORS.length])
       can.group.visible = false
       this.front.scene.add(can.group)
       this.flavorCans.push(can)
-    })
+    }
     this.finaleCan = createCan(this.labelTextures[0])
     this.finaleCan.group.visible = false
     this.front.scene.add(this.finaleCan.group)
