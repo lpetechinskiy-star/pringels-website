@@ -17,6 +17,8 @@ npm run build:single # dist-single/index.html — всё в одном файл�
 
 Демо исходного компонента-референса: `/#disc-demo`.
 
+Готовый сайт одним файлом: [`release/litenergles.html`](release/litenergles.html) — скачайте и откройте в браузере, интернет не нужен.
+
 ## Стек
 
 Vite + React + TypeScript, Tailwind CSS v4 (структура shadcn: `components.json`, `@/components/ui`, `@/lib/utils`),

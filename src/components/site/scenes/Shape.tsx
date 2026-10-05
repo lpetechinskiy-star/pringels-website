@@ -39,20 +39,20 @@ export function Shape() {
       />
       <div className="absolute inset-x-4 top-20 md:left-8 md:right-auto md:top-24 md:max-w-[44vw]">
         <Eyebrow n="02">Форма</Eyebrow>
-        <h2 data-formula className="display mt-4 w-max whitespace-nowrap pr-[0.1em] text-[clamp(3rem,12vw,7.5rem)] normal-case">
+        <h2 data-formula className="display mt-4 w-max whitespace-nowrap pr-[0.1em] text-[clamp(2.4rem,min(12vw,15svh),7.5rem)] normal-case">
           z = x² − y²
         </h2>
-        <p className="mt-3 max-w-md font-serif text-[clamp(1.1rem,2.2vw,1.6rem)] italic leading-snug">
+        <p className="mt-4 max-w-md font-serif text-[clamp(1.1rem,2.2vw,1.6rem)] italic leading-snug short:max-w-xs short:text-base">
           Гиперболический параболоид. Звучит как диагноз. Хрустит как праздник.
         </p>
       </div>
 
-      <div className="absolute inset-x-4 bottom-6 h-44 md:bottom-12 md:left-8 md:right-auto md:w-[min(26rem,38vw)]">
+      <div className="absolute inset-x-4 bottom-6 h-44 md:bottom-12 md:left-8 md:right-auto md:w-[min(26rem,38vw)] short:bottom-4 short:h-28">
         {VIEWS.map((v) => (
-          <article key={v.n} data-view className="invisible absolute inset-x-0 bottom-0 rounded-[28px] bg-ink p-6 text-cream shadow-2xl">
+          <article key={v.n} data-view className="invisible absolute inset-x-0 bottom-0 rounded-[28px] bg-ink p-6 text-cream shadow-2xl short:p-4">
             <p className="eyebrow text-crisp">Вид {v.n}</p>
             <h3 className="mt-3 font-display text-2xl font-extrabold tracking-[-0.03em]">{v.title}</h3>
-            <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/80">{v.text}</p>
+            <p className="mt-2 text-[0.95rem] leading-relaxed text-cream/80 short:hidden">{v.text}</p>
           </article>
         ))}
       </div>

@@ -92,14 +92,14 @@ export function Flavors() {
           >
             {f.name}
           </h2>
-          <p data-flavor-copy className="mt-4 hidden max-w-sm font-serif text-xl italic leading-snug md:block">
+          <p data-flavor-copy className="mt-4 hidden max-w-sm font-serif text-xl italic leading-snug md:block short:text-base">
             {f.tagline}
           </p>
-          <div data-flavor-copy className="mt-6 hidden space-y-2 md:block">
+          <div data-flavor-copy className="mt-6 hidden space-y-2 md:block short:hidden">
             <Meter label="Солёность" value={f.salt} color={f.ink} />
             <Meter label="Дерзость" value={f.nerve} color={f.ink} />
           </div>
-          <ul data-flavor-copy className="mt-6 hidden flex-wrap gap-2 md:flex">
+          <ul data-flavor-copy className="mt-6 hidden flex-wrap gap-2 md:flex short:hidden">
             {f.notes.map((n) => (
               <li key={n} className="rounded-full border-2 px-3 py-1 text-sm font-semibold" style={{ borderColor: f.ink }}>
                 {n}
@@ -145,12 +145,12 @@ export function Flavors() {
                   className="block size-4 rounded-full border-2"
                   style={{ backgroundColor: x.base, borderColor: i === flavor ? f.base : f.ink }}
                 />
-                <span className="sr-only md:not-sr-only">{x.name}</span>
+                <span className="sr-only xl:not-sr-only">{x.name}</span>
               </button>
             ))}
           </div>
           <div className="flex items-center gap-3">
-            <span className="eyebrow hidden opacity-80 lg:inline">Тяни банки · ← →</span>
+            <span className="eyebrow hidden opacity-80 2xl:inline">Тяни банки · ← →</span>
             <button
               type="button"
               className="round-btn"

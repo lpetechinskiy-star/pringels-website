@@ -168,7 +168,7 @@ export class Director {
     c.C = c.S * 2
     c.canScale = c.mobile
       ? Math.min((c.H * 0.32) / CAN_H, (c.W * 0.4) / (2 * CAN_R))
-      : Math.min((c.H * 0.5) / CAN_H, (c.W * 0.2) / (2 * CAN_R))
+      : Math.min((c.H * 0.44) / CAN_H, (c.W * 0.2) / (2 * CAN_R))
     // towers: split the chips into T stacks of uneven height
     const T = c.mobile ? 3 : 5
     const weights = [9, 6, 8, 5, 7].slice(0, T)

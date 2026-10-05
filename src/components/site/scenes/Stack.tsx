@@ -40,7 +40,7 @@ export function Stack() {
     <Scene id="stack" label="Стопка" sectionRef={ref} stageClassName="text-ink">
       <div className="absolute inset-x-4 top-20 md:left-auto md:right-[6vw] md:top-1/2 md:w-[min(34rem,42vw)] md:-translate-y-1/2">
         <Eyebrow n="03">Стопка</Eyebrow>
-        <h2 className="display mt-4 text-[clamp(2.4rem,10vw,5rem)] lg:text-[clamp(2.4rem,5.4vw,5.6rem)]">
+        <h2 className="display mt-4 text-[clamp(2rem,min(10vw,9svh),5rem)] lg:text-[clamp(2rem,min(5.4vw,10svh),5.6rem)]">
           {["Изгиб", "ложится", "в изгиб."].map((w) => (
             <span key={w} className="block overflow-hidden pb-[0.06em]">
               <span data-line className="block">
@@ -49,11 +49,11 @@ export function Stack() {
             </span>
           ))}
         </h2>
-        <p data-body className="mt-5 hidden max-w-md text-lg leading-relaxed md:block">
+        <p data-body className="mt-5 hidden max-w-md text-lg leading-relaxed md:block short:hidden">
           Никакой магии — только геометрия. Каждый чипс повторяет соседа, поэтому стопка собирается сама и не шуршит по
           пустякам.
         </p>
-        <p data-body className="mt-4 font-display text-[clamp(2rem,6vw,4rem)] font-black tracking-[-0.04em] md:mt-8" aria-live="off">
+        <p data-body className="mt-4 font-display text-[clamp(1.6rem,min(6vw,9svh),4rem)] font-black tracking-[-0.04em] md:mt-8 short:mt-3" aria-live="off">
           <Odometer value={stacked} />
           <span className="text-ink/40"> / {total}</span>
           <span className="eyebrow ml-3 align-middle">в стопке</span>

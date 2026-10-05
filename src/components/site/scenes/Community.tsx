@@ -28,13 +28,13 @@ export function Community() {
     <Scene id="community" label="Башни сообщества" sectionRef={ref} stageClassName="text-ink">
       <div data-head className="absolute inset-x-4 top-20 md:left-8 md:right-auto md:top-24 md:max-w-xl">
         <Eyebrow n="08">Сообщество</Eyebrow>
-        <h2 className="display mt-3 text-[clamp(2.2rem,7vw,5.5rem)]">Башни наших людей</h2>
-        <p className="mt-3 hidden max-w-md text-lg leading-relaxed md:block">
+        <h2 className="display mt-3 text-[clamp(1.8rem,min(7vw,10svh),5.5rem)]">Башни наших людей</h2>
+        <p className="mt-3 hidden max-w-md text-lg leading-relaxed md:block short:hidden">
           Каждую неделю кто-то строит стопку выше, чем вчера. Рекорд пока держится. Выложи свою с тегом{" "}
           <b className="font-display">#ГиперболаВкуса</b>.
         </p>
       </div>
-      <ul className="absolute inset-x-0 bottom-6 h-36 md:bottom-10 md:h-40">
+      <ul className="absolute inset-x-0 bottom-6 h-36 md:bottom-10 md:h-40 short:bottom-3">
         {TOWERS.map((t, i) => {
           // columns sit under the towers: 5 on desktop, the first 3 on phones
           const desk = 16 + i * 17
@@ -54,7 +54,7 @@ export function Community() {
                 {t.n}
                 <span className="ml-1 text-[0.55em] font-semibold">шт.</span>
               </p>
-              <p className="mt-1 hidden font-serif text-sm italic leading-snug md:block">«{t.q}»</p>
+              <p className="mt-1 hidden font-serif text-sm italic leading-snug md:block short:hidden">«{t.q}»</p>
             </li>
           )
         })}

@@ -31,16 +31,16 @@ export function History() {
       <div aria-hidden="true" className="absolute inset-x-0 bottom-[7%] h-[2px] bg-ink/25 md:bottom-[5%]" />
       <ol
         ref={track}
-        className="absolute left-0 top-[18%] flex h-[52%] w-max items-stretch gap-[6vw] pl-4 pr-[10vw] will-change-transform md:top-[20%] md:pl-[8vw]"
+        className="absolute left-0 top-[18%] flex h-[52%] w-max items-stretch gap-[6vw] pl-4 pr-[10vw] will-change-transform md:top-[20%] md:pl-[8vw] short:top-[34%] short:h-[56%]"
       >
         {YEARS.map((y, i) => (
           <li key={y.y} className="relative flex w-[78vw] flex-col justify-between border-l-2 border-ink pl-5 md:w-[38vw] md:pl-8">
-            <span data-year className="display outline-text block text-[clamp(3rem,9vw,7rem)] text-brand">
+            <span data-year className="display outline-text block text-[clamp(2.4rem,min(9vw,15svh),7rem)] text-brand">
               {y.y}
             </span>
             <div>
-              <h3 className="font-display text-[clamp(1.6rem,3.6vw,3rem)] font-extrabold tracking-[-0.04em]">{y.t}</h3>
-              <p className="mt-2 max-w-sm text-[1.05rem] leading-relaxed md:text-lg">{y.d}</p>
+              <h3 className="font-display text-[clamp(1.3rem,min(3.6vw,7svh),3rem)] font-extrabold tracking-[-0.04em]">{y.t}</h3>
+              <p className="mt-2 max-w-sm text-[1.05rem] leading-relaxed md:text-lg short:text-sm short:leading-snug">{y.d}</p>
             </div>
             <span className="eyebrow absolute -left-[7px] top-0 size-3 rounded-full bg-ink" aria-hidden="true" />
             <span className="sr-only">{i + 1} из {YEARS.length}</span>

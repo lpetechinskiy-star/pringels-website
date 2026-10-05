@@ -32,14 +32,14 @@ export function Story() {
       <Eyebrow n="01" className="absolute left-4 top-20 md:left-8 md:top-24">
         Полёт
       </Eyebrow>
-      <div ref={text} className="absolute inset-0 grid place-content-center gap-[0.35em] px-5 text-center md:px-[12vw]">
+      <div ref={text} className="absolute inset-0 grid place-content-center gap-[0.35em] px-5 text-center md:px-[12vw] short:gap-[0.2em] short:pb-2 short:pt-24">
         {LINES.map((l, i) => (
           <p
             key={i}
             className={
               i === 1
-                ? "font-serif text-[clamp(2rem,7vw,5.5rem)] italic leading-none text-crisp"
-                : "font-display text-[clamp(1.5rem,4.4vw,3.6rem)] font-bold leading-[1.05] tracking-[-0.03em]"
+                ? "font-serif text-[clamp(1.6rem,min(7vw,11svh),5.5rem)] italic leading-none text-crisp"
+                : "font-display text-[clamp(1.1rem,min(4.4vw,6.4svh),3.6rem)] font-bold leading-[1.08] tracking-[-0.03em]"
             }
           >
             {l}

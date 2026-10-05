@@ -4,6 +4,13 @@
 @import "@fontsource/playfair-display/400-italic.css";
 @import "@fontsource/playfair-display/700-italic.css";
 
+/* "md" = the wide layout. Same rule as the 3D stage (stage.ts): at least 768px wide and not
+   portrait-tall, so an iPad held upright gets the phone composition in both the type and the 3D. */
+@custom-variant md (@media (min-width: 48rem) and (min-aspect-ratio: 4 / 5));
+
+/* Low screens (a phone on its side): headlines are capped by height too, secondary copy steps back. */
+@custom-variant short (@media (max-height: 540px));
+
 @theme {
   --font-display: "Unbounded Variable", "Unbounded", system-ui, sans-serif;
   --font-sans: "Onest Variable", "Onest", system-ui, sans-serif;

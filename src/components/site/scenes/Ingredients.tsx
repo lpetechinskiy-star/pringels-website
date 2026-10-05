@@ -49,7 +49,7 @@ export function Ingredients() {
               <span
                 data-word
                 className={
-                  "display block text-[11vw] md:text-[min(10.5vw,13rem)] " + (i % 2 ? "outline-text text-crisp" : "")
+                  "display block text-[11vw] md:text-[min(10.5vw,13rem,24svh)] " + (i % 2 ? "outline-text text-crisp" : "")
                 }
               >
                 {it.word}
@@ -57,7 +57,7 @@ export function Ingredients() {
             </span>
             <span
               data-note
-              className="absolute inset-x-6 top-[22%] text-center font-serif text-[clamp(1.1rem,2.4vw,1.8rem)] italic opacity-0"
+              className="absolute inset-x-6 top-[22%] text-center short:top-auto short:bottom-5 font-serif text-[clamp(1.1rem,2.4vw,1.8rem)] italic opacity-0"
             >
               {it.note}
             </span>

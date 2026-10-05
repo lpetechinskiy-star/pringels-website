@@ -71,7 +71,7 @@ export function Hero() {
       <div className="absolute inset-0 grid place-items-center px-2" data-title>
         <h1
           ref={title}
-          className="display invisible select-none text-center text-[clamp(3.6rem,19vw,9rem)] md:whitespace-nowrap md:text-[min(11.4vw,20rem)]"
+          className="display invisible select-none text-center text-[clamp(3.6rem,19vw,9rem)] md:whitespace-nowrap md:text-[min(11.4vw,20rem,30svh)]"
           style={{ perspective: "600px" }}
         >
           <span className="sr-only">Гипербола — Litenergles</span>
@@ -86,7 +86,7 @@ export function Hero() {
 
       <p
         data-fade
-        className="absolute inset-x-4 bottom-[22%] text-center font-serif text-[clamp(1.25rem,4.6vw,2.2rem)] italic leading-tight md:bottom-[17%]"
+        className="absolute inset-x-4 bottom-[22%] text-center font-serif text-[clamp(1.25rem,4.6vw,2.2rem)] italic leading-tight md:bottom-[17%] short:bottom-[24%] short:text-lg"
       >
         Мы не преувеличиваем.
         <br />

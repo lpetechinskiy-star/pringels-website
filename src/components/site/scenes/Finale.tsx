@@ -29,16 +29,16 @@ export function Finale() {
           <Eyebrow n="09" className="justify-center">
             Финал
           </Eyebrow>
-          <h2 data-head className="display mt-3 text-[clamp(2.4rem,8.5vw,7.5rem)]">
+          <h2 data-head className="display mt-3 text-[clamp(2rem,min(8.5vw,13svh),7.5rem)]">
             Открыл — дальше сам.
           </h2>
-          <p data-cta className="mx-auto mt-3 max-w-md font-serif text-lg italic leading-snug md:text-xl">
+          <p data-cta className="mx-auto mt-5 max-w-md font-serif text-lg italic leading-snug md:text-xl short:hidden">
             Банка твоего вкуса: «{f.name}». Одна банка, ни одного шанса остановиться.
           </p>
         </div>
 
         <div className="absolute inset-x-4 bottom-6 flex flex-col items-center gap-3 md:bottom-10">
-          <div data-cta className="flex items-center gap-3">
+          <div data-cta className="flex items-center gap-3 short:hidden">
             <button type="button" className="round-btn" aria-label="Повернуть банку влево" onClick={() => commands.spinCan(-1)}>
               <ArrowLeft aria-hidden="true" className="size-5" />
             </button>

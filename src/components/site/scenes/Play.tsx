@@ -35,31 +35,32 @@ export function Play() {
 
   return (
     <Scene id="play" label="Гравитация" drag="play" sectionRef={ref} stageClassName="text-paper">
-      <div className="pointer-events-none absolute inset-x-4 top-20 text-center md:top-24">
+      {/* one column, in flow: the counter and the button can never slide under the copy */}
+      <div className="absolute inset-x-4 top-20 flex flex-col items-center text-center md:top-24 short:top-16">
         <Eyebrow n="07" className="justify-center">
           Гравитация
         </Eyebrow>
-        <h2 className="display mt-4 text-[clamp(2.4rem,10vw,6.5rem)]">
+        <h2 className="display pointer-events-none mt-4 text-[clamp(2rem,min(10vw,11svh),6.5rem)] short:mt-2">
           {["Хватай.", "Бросай.", "Повторяй."].map((w) => (
             <span key={w} data-drop className="inline-block px-[0.12em]">
               {w}
             </span>
           ))}
         </h2>
-        <p className="mx-auto mt-4 max-w-md text-base leading-relaxed md:text-lg">
+        <p className="pointer-events-none mx-auto mt-4 max-w-md text-base leading-relaxed md:text-lg short:hidden">
           <span className="hidden pointer-fine:inline">Перетащи чипс и отпусти с размаху. Клик по пустому месту подбросит всё.</span>
           <span className="pointer-fine:hidden">Тяни чипс пальцем и отпускай. Тап по пустому месту подбросит всё.</span>
         </p>
-      </div>
-      <div className="absolute inset-x-4 top-[46%] flex flex-col items-center gap-3 md:top-[56%]">
-        <p className="font-display text-sm font-bold uppercase tracking-[0.18em]" aria-live="polite">
-          Брошено: <span ref={counter} className="inline-block text-2xl tabular-nums text-gold">{throws}</span>
-          <span className="block pt-1 text-center font-serif text-lg normal-case italic tracking-normal">{reaction}</span>
-        </p>
-        <button type="button" onClick={() => commands.shake()} className="pill bg-paper text-brand">
-          <Hand aria-hidden="true" className="size-4" />
-          Встряхнуть
-        </button>
+        <div className="mt-6 flex flex-col items-center gap-3 short:mt-2 short:flex-row short:gap-5">
+          <p className="pointer-events-none font-display text-sm font-bold uppercase tracking-[0.18em]" aria-live="polite">
+            Брошено: <span ref={counter} className="inline-block text-2xl tabular-nums text-gold">{throws}</span>
+            <span className="block pt-1 text-center font-serif text-lg normal-case italic tracking-normal short:hidden">{reaction}</span>
+          </p>
+          <button type="button" onClick={() => commands.shake()} className="pill bg-paper text-brand">
+            <Hand aria-hidden="true" className="size-4" />
+            Встряхнуть
+          </button>
+        </div>
       </div>
     </Scene>
   )
