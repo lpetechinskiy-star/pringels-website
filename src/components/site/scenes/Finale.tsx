@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArrowLeft, ArrowRight, ArrowUp, MapPin, Sparkles } from "lucide-react"
 import { Eyebrow, Scene, useScrub, useSectionRef } from "../scene"
 import { FLAVORS } from "@/data/flavors"
 import { commands, useExperience } from "@/experience/store"
 import { scrollToId } from "@/experience/Experience"
+import { Privacy } from "../Privacy"
 
 /**
  * 09 · Финал. Every chip spirals back into a column, the can drops over them
@@ -81,8 +82,21 @@ export function Finale() {
 }
 
 export function Footer() {
+  const [privacy, setPrivacy] = useState(() => typeof location !== "undefined" && location.hash === "#privacy")
+
+  useEffect(() => {
+    const onHash = () => setPrivacy(location.hash === "#privacy")
+    window.addEventListener("hashchange", onHash)
+    return () => window.removeEventListener("hashchange", onHash)
+  }, [])
+
+  const close = () => {
+    setPrivacy(false)
+    if (location.hash === "#privacy") history.replaceState(null, "", location.pathname + location.search)
+  }
+
   return (
-    <footer className="relative z-10 bg-night px-4 py-14 text-paper md:px-8">
+    <footer className="relative z-10 bg-night px-4 pb-8 pt-14 text-paper md:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="display text-[clamp(2.4rem,9vw,6rem)] lowercase text-crisp">litenergles</p>
@@ -93,9 +107,23 @@ export function Footer() {
             Litenergles — вымышленный бренд. Это концепт интерактивной кампании для портфолио, а не реклама реального
             продукта. Все персонажи, башни и рекорды выдуманы.
           </p>
-          <p>Сделано на Three.js, GSAP и любопытстве. © 2026</p>
+          <p>Сделано на Three.js, GSAP и любопытстве.</p>
         </div>
       </div>
+      <div className="mx-auto mt-12 flex max-w-6xl flex-col-reverse gap-3 border-t border-paper/15 pt-6 text-sm text-paper/60 sm:flex-row sm:items-center sm:justify-between">
+        <p>© 2026 Litenergles</p>
+        <a
+          href="#privacy"
+          onClick={(e) => {
+            e.preventDefault()
+            setPrivacy(true)
+          }}
+          className="-mx-2 inline-flex min-h-11 items-center rounded-md px-2 font-semibold text-paper underline decoration-paper/40 underline-offset-4 transition-colors hover:text-crisp hover:decoration-crisp"
+        >
+          Политика конфиденциальности
+        </a>
+      </div>
+      <Privacy open={privacy} onClose={close} />
     </footer>
   )
 }
